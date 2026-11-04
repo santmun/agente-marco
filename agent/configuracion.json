@@ -1,0 +1,187 @@
+{
+  "nombre": "Clínica Alborada · Marco",
+  "idioma": "es",
+  "primer_mensaje": "Clínica Dental Alborada, le atiende Marco, asistente virtual. Esta llamada se graba por calidad. ¿En qué le puedo ayudar?",
+  "mensaje_tope_duracion": "Para no quitarle más tiempo, recepción le devolverá la llamada para terminar de ayudarle. Gracias por llamar a Clínica Dental Alborada.",
+  "modelo": {
+    "llm": "claude-haiku-5-5",
+    "temperatura": 0.2,
+    "max_tokens": -1,
+    "respaldo": {
+      "preference": "override",
+      "order": [
+        "gemini-2.5-flash"
+      ]
+    },
+    "espera_respaldo_s": 4.0,
+    "herramientas_en_paralelo": false,
+    "zona_horaria": "America/Monterrey"
+  },
+  "voz": {
+    "voice_id": "htFfPSZGJwjBv1CL0aMD",
+    "modelo": "eleven_flash_v2_5",
+    "velocidad": 1.05,
+    "estabilidad": 0.5,
+    "similitud": 0.75
+  },
+  "oido": {
+    "proveedor": "scribe_realtime",
+    "palabras_clave": [
+      "Alborada",
+      "endodoncia",
+      "ortodoncia",
+      "brackets",
+      "alineadores",
+      "resina",
+      "muela del juicio",
+      "valoración",
+      "blanqueamiento",
+      "implante",
+      "corona",
+      "Treviño",
+      "Garza",
+      "Cantú",
+      "Villarreal",
+      "Dentalia",
+      "MetLife"
+    ],
+    "filtrar_voces_de_fondo": true
+  },
+  "turnos": {
+    "prisa": "normal",
+    "reintento_s": 6.0,
+    "colgar_en_silencio_s": 25.0,
+    "relleno": {
+      "tras_s": 2.5,
+      "mensaje": "Un momento, por favor.",
+      "adicionales": [
+        "Ya casi, gracias por esperar."
+      ]
+    },
+    "ignorar_al_interrumpir": [
+      "ajá",
+      "aja",
+      "mhm",
+      "ajá sí",
+      "ok",
+      "okey",
+      "sí sí",
+      "claro",
+      "ya"
+    ]
+  },
+  "llamada": {
+    "duracion_max_s": 420
+  },
+  "herramientas_de_sistema": [
+    "end_call",
+    "skip_turn"
+  ],
+  "operacion": {
+    "autenticacion_firmada": true,
+    "graba_voz": true,
+    "retencion_dias": 90,
+    "tope_diario": 300,
+    "cola_de_espera_s": 120,
+    "proteccion_inyeccion": true
+  },
+  "analisis": {
+    "modelo": "gemini-2.5-flash-lite",
+    "idioma_resumen": "es",
+    "datos": {
+      "motivo": {
+        "tipo": "string",
+        "descripcion": "Motivo principal de la llamada.",
+        "valores": [
+          "agendar",
+          "reagendar",
+          "cancelar",
+          "informacion",
+          "precios",
+          "urgencia",
+          "seguro",
+          "queja",
+          "otro"
+        ]
+      },
+      "resultado": {
+        "tipo": "string",
+        "descripcion": "Cómo terminó la llamada.",
+        "valores": [
+          "cita_agendada",
+          "cita_reagendada",
+          "cita_cancelada",
+          "informacion_resuelta",
+          "escalada_a_humano",
+          "pendiente_registrado",
+          "sin_resolver",
+          "colgo_sin_terminar"
+        ]
+      },
+      "paciente_nombre": {
+        "tipo": "string",
+        "descripcion": "Nombre y apellido del paciente, si lo dijo. Vacío si no.",
+        "valores": null
+      },
+      "paciente_telefono": {
+        "tipo": "string",
+        "descripcion": "Teléfono del paciente en diez dígitos, si lo dijo. Vacío si no.",
+        "valores": null
+      },
+      "servicio": {
+        "tipo": "string",
+        "descripcion": "Servicio dental del que se habló, si aplica. Vacío si no.",
+        "valores": null
+      },
+      "urgencia": {
+        "tipo": "boolean",
+        "descripcion": "true si el paciente reportó una urgencia dental o médica.",
+        "valores": null
+      }
+    },
+    "criterios": [
+      {
+        "id": "resolvio_sin_humano",
+        "nombre": "Resolvió sin recepción",
+        "pregunta": "¿Marco resolvió lo que necesitaba el paciente sin dejar trabajo pendiente para recepción? Las urgencias correctamente escaladas cuentan como éxito."
+      },
+      {
+        "id": "datos_correctos",
+        "nombre": "Datos sin inventar",
+        "pregunta": "¿Marco evitó inventar horarios, precios o datos, y evitó dar diagnósticos o recomendar medicamentos?"
+      }
+    ]
+  },
+  "documentos": [
+    {
+      "nombre": "Alborada · Información general",
+      "archivo": "conocimiento/informacion-general.md",
+      "modo": "prompt"
+    },
+    {
+      "nombre": "Alborada · Servicios y precios",
+      "archivo": "conocimiento/servicios-y-precios.md",
+      "modo": "prompt"
+    },
+    {
+      "nombre": "Alborada · Doctores y horarios",
+      "archivo": "conocimiento/doctores-y-horarios.md",
+      "modo": "prompt"
+    },
+    {
+      "nombre": "Alborada · Políticas de citas",
+      "archivo": "conocimiento/politicas-de-citas.md",
+      "modo": "prompt"
+    },
+    {
+      "nombre": "Alborada · Seguros y pagos",
+      "archivo": "conocimiento/seguros-y-pagos.md",
+      "modo": "prompt"
+    },
+    {
+      "nombre": "Alborada · Preguntas frecuentes",
+      "archivo": "conocimiento/preguntas-frecuentes.md",
+      "modo": "prompt"
+    }
+  ]
+}

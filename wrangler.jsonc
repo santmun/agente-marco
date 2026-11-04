@@ -1,0 +1,22 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "marco-centro-control",
+  "main": "src/worker/index.ts",
+  "compatibility_date": "2026-11-04",
+  "assets": {
+    "directory": "dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*", "/tools/*"]
+  },
+  "durable_objects": {
+    "bindings": [{ "name": "ESTADO", "class_name": "EstadoClinica" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["EstadoClinica"] }],
+  "triggers": { "crons": ["*/2 * * * *", "7 * * * *"] },
+  "observability": { "enabled": true, "traces": { "enabled": true } },
+  "vars": {
+    "AGENT_ID": "agent_4101m6ktn9smf75vdnb3frts5jbt",
+    "NOMBRE_CLINICA": "Clínica Dental Alborada"
+  }
+}

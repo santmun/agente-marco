@@ -1,0 +1,281 @@
+[
+  {
+    "name": "consultar_disponibilidad",
+    "description": "Busca dos o tres horarios libres reales en los calendarios de los doctores. Úsala cuando ya sepas el servicio y una fecha o preferencia. Nunca inventes horarios. Si la fecha pedida no tiene espacio, devuelve los siguientes días disponibles.",
+    "type": "webhook",
+    "response_timeout_secs": 12,
+    "pre_tool_speech": "auto",
+    "tool_call_sound": "typing",
+    "interruption_mode": "allow",
+    "api_schema": {
+      "url": "${WORKER_URL}/tools/disponibilidad",
+      "method": "POST",
+      "request_headers": {
+        "Authorization": "Bearer ${TOOLS_SECRET}"
+      },
+      "request_body_schema": {
+        "type": "object",
+        "required": [
+          "servicio",
+          "fecha",
+          "conv_id"
+        ],
+        "properties": {
+          "servicio": {
+            "type": "string",
+            "description": "Servicio que pide el paciente, por ejemplo limpieza, valoración, endodoncia, ortodoncia, muela del juicio o urgencia. Si no sabe qué necesita, usa valoración."
+          },
+          "fecha": {
+            "type": "string",
+            "description": "Fecha preferida en formato AAAA-MM-DD, calculada a partir de la fecha de hoy. Si el paciente no tiene preferencia, usa la fecha de hoy."
+          },
+          "turno": {
+            "type": "string",
+            "description": "Preferencia de horario del paciente. Usa cualquiera si no dijo nada.",
+            "enum": [
+              "manana",
+              "tarde",
+              "cualquiera"
+            ]
+          },
+          "doctor": {
+            "type": "string",
+            "description": "Apellido del doctor si el paciente pidió uno en específico. Déjalo vacío si no."
+          },
+          "conv_id": {
+            "type": "string",
+            "dynamic_variable": "system__conversation_id"
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "buscar_paciente",
+    "description": "Busca a un paciente por teléfono y devuelve su nombre y sus próximas citas con su cita_id. Úsala siempre antes de cambiar o cancelar una cita.",
+    "type": "webhook",
+    "response_timeout_secs": 10,
+    "pre_tool_speech": "auto",
+    "tool_call_sound": "typing",
+    "interruption_mode": "allow",
+    "api_schema": {
+      "url": "${WORKER_URL}/tools/paciente",
+      "method": "POST",
+      "request_headers": {
+        "Authorization": "Bearer ${TOOLS_SECRET}"
+      },
+      "request_body_schema": {
+        "type": "object",
+        "required": [
+          "telefono",
+          "conv_id"
+        ],
+        "properties": {
+          "telefono": {
+            "type": "string",
+            "description": "Teléfono del paciente, solo los diez dígitos."
+          },
+          "conv_id": {
+            "type": "string",
+            "dynamic_variable": "system__conversation_id"
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "agendar_cita",
+    "description": "Agenda la cita en el calendario del doctor y la registra en el sistema. Úsala solo después de que el paciente eligió un horario y confirmó sus datos. Si responde que el horario se ocupó, ofrece las alternativas que devuelve.",
+    "type": "webhook",
+    "response_timeout_secs": 15,
+    "pre_tool_speech": "auto",
+    "tool_call_sound": "typing",
+    "interruption_mode": "disable_during_tool",
+    "api_schema": {
+      "url": "${WORKER_URL}/tools/agendar",
+      "method": "POST",
+      "request_headers": {
+        "Authorization": "Bearer ${TOOLS_SECRET}"
+      },
+      "request_body_schema": {
+        "type": "object",
+        "required": [
+          "nombre",
+          "telefono",
+          "servicio",
+          "slot_id",
+          "acepta_whatsapp",
+          "conv_id"
+        ],
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "description": "Nombre y apellido del paciente."
+          },
+          "telefono": {
+            "type": "string",
+            "description": "Teléfono confirmado por el paciente, solo los diez dígitos."
+          },
+          "servicio": {
+            "type": "string",
+            "description": "El mismo servicio usado para consultar disponibilidad."
+          },
+          "slot_id": {
+            "type": "string",
+            "description": "El slot_id exacto del horario elegido, tal como lo devolvió consultar_disponibilidad."
+          },
+          "acepta_whatsapp": {
+            "type": "boolean",
+            "description": "true si el paciente acepta recibir la confirmación por WhatsApp en ese número."
+          },
+          "notas": {
+            "type": "string",
+            "description": "Dato breve relevante para el doctor, como embarazo o motivo de la consulta. Vacío si no hay."
+          },
+          "conv_id": {
+            "type": "string",
+            "dynamic_variable": "system__conversation_id"
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "reagendar_cita",
+    "description": "Mueve una cita existente a un nuevo horario. Antes usa buscar_paciente para obtener el cita_id y consultar_disponibilidad para obtener el slot_id nuevo.",
+    "type": "webhook",
+    "response_timeout_secs": 15,
+    "pre_tool_speech": "auto",
+    "tool_call_sound": "typing",
+    "interruption_mode": "disable_during_tool",
+    "api_schema": {
+      "url": "${WORKER_URL}/tools/reagendar",
+      "method": "POST",
+      "request_headers": {
+        "Authorization": "Bearer ${TOOLS_SECRET}"
+      },
+      "request_body_schema": {
+        "type": "object",
+        "required": [
+          "cita_id",
+          "slot_id",
+          "conv_id"
+        ],
+        "properties": {
+          "cita_id": {
+            "type": "string",
+            "description": "El cita_id que devolvió buscar_paciente."
+          },
+          "slot_id": {
+            "type": "string",
+            "description": "El slot_id del nuevo horario elegido."
+          },
+          "conv_id": {
+            "type": "string",
+            "dynamic_variable": "system__conversation_id"
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "cancelar_cita",
+    "description": "Cancela una cita y libera el horario del doctor. Úsala solo cuando el paciente confirmó que quiere cancelar. Antes usa buscar_paciente para obtener el cita_id.",
+    "type": "webhook",
+    "response_timeout_secs": 12,
+    "pre_tool_speech": "auto",
+    "tool_call_sound": "typing",
+    "interruption_mode": "disable_during_tool",
+    "api_schema": {
+      "url": "${WORKER_URL}/tools/cancelar",
+      "method": "POST",
+      "request_headers": {
+        "Authorization": "Bearer ${TOOLS_SECRET}"
+      },
+      "request_body_schema": {
+        "type": "object",
+        "required": [
+          "cita_id",
+          "conv_id"
+        ],
+        "properties": {
+          "cita_id": {
+            "type": "string",
+            "description": "El cita_id que devolvió buscar_paciente."
+          },
+          "motivo": {
+            "type": "string",
+            "description": "Motivo breve de la cancelación, si el paciente lo mencionó."
+          },
+          "conv_id": {
+            "type": "string",
+            "dynamic_variable": "system__conversation_id"
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "registrar_pendiente",
+    "description": "Avisa a una persona de la clínica. Úsala de inmediato ante una urgencia dental, y también cuando el paciente pide que le devuelvan la llamada, tiene una queja, una duda de su seguro o algo que no puedes resolver.",
+    "type": "webhook",
+    "response_timeout_secs": 10,
+    "pre_tool_speech": "off",
+    "tool_call_sound": null,
+    "interruption_mode": "disable_during_tool",
+    "api_schema": {
+      "url": "${WORKER_URL}/tools/pendiente",
+      "method": "POST",
+      "request_headers": {
+        "Authorization": "Bearer ${TOOLS_SECRET}"
+      },
+      "request_body_schema": {
+        "type": "object",
+        "required": [
+          "tipo",
+          "prioridad",
+          "motivo",
+          "conv_id"
+        ],
+        "properties": {
+          "tipo": {
+            "type": "string",
+            "description": "Tipo de pendiente.",
+            "enum": [
+              "urgencia",
+              "devolver_llamada",
+              "queja",
+              "seguro",
+              "otro"
+            ]
+          },
+          "prioridad": {
+            "type": "string",
+            "description": "alta para urgencias y quejas fuertes, media para llamadas por devolver, baja para lo demás.",
+            "enum": [
+              "alta",
+              "media",
+              "baja"
+            ]
+          },
+          "nombre": {
+            "type": "string",
+            "description": "Nombre del paciente si lo dio."
+          },
+          "telefono": {
+            "type": "string",
+            "description": "Teléfono de contacto, solo dígitos, si lo dio."
+          },
+          "motivo": {
+            "type": "string",
+            "description": "Resumen de una o dos frases con lo que necesita el paciente y sus síntomas, si los mencionó."
+          },
+          "conv_id": {
+            "type": "string",
+            "dynamic_variable": "system__conversation_id"
+          }
+        }
+      }
+    }
+  }
+]
