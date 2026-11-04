@@ -117,3 +117,7 @@ Sin llave de Composio ni hoja instalada, el panel funciona en vista previa con d
 - Borra los datos de ejemplo: las filas con `es_demo=1` en la hoja y sus eventos en los calendarios.
 - Revisa el aviso de privacidad y si Google Sheets es adecuado para guardar datos de salud.
 - Define quién atiende las urgencias: Marco promete que el doctor de guardia devuelve la llamada en 15 minutos.
+
+## Licencia
+
+[MIT](LICENSE).
